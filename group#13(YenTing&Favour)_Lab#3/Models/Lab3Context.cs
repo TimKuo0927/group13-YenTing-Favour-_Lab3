@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace group_13_YenTing_Favour__Lab_3.Models;
 
-public partial class Lab3Context : DbContext
+public partial class Lab3Context : IdentityDbContext
 {
     public Lab3Context()
     {
@@ -29,6 +31,7 @@ public partial class Lab3Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); 
         modelBuilder.Entity<Episode>(entity =>
         {
             entity.Property(e => e.EpisodeId).HasColumnName("EpisodeID");

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace group_13_YenTing_Favour__Lab_3.Models;
+
 
 public partial class User
 {
