@@ -23,12 +23,12 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
         {
 
             var userIdString = _userManager.GetUserId(User);
-            if (!Guid.TryParse(userIdString, out Guid userId))
+            if (String.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Login", "Account");
             }
             var podcasts = await _db.Podcasts
-           .Where(p => p.CreatorId == userId && (p.IsHidden == false || p.IsHidden == null))
+           .Where(p => p.CreatorId == userIdString && (p.IsHidden == false || p.IsHidden == null))
            .OrderByDescending(p => p.CreatedDate)
            .ToListAsync();
             return View(podcasts);
@@ -43,7 +43,7 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             Podcast podcast = new Podcast();
             podcast.CreatedDate = DateTime.Now;
             podcast.IsHidden = false;
-            podcast.CreatorId = _userManager.GetUserId(User) != null ? Guid.Parse(_userManager.GetUserId(User)) : Guid.Empty;
+            podcast.CreatorId = _userManager.GetUserId(User) != null ? _userManager.GetUserId(User) : "";
             return View(podcast);
         }
 
@@ -52,7 +52,7 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
         {
             podcast.CreatedDate = DateTime.Now;
             podcast.IsHidden = false;
-            podcast.CreatorId = _userManager.GetUserId(User) != null ? Guid.Parse(_userManager.GetUserId(User)) : Guid.Empty;
+            podcast.CreatorId = _userManager.GetUserId(User) != null ? _userManager.GetUserId(User) : "";
 
             await _db.Podcasts.AddAsync(podcast);
             await _db.SaveChangesAsync();

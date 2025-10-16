@@ -11,13 +11,13 @@ public partial class Podcast
 
     public string Description { get; set; } = null!;
 
-    public Guid CreatorId { get; set; }
+    public string CreatorId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
     public bool? IsHidden { get; set; }
 
-    public virtual User Creator { get; set; } = null!;
+    //public virtual User Creator { get; set; } = null!;
 
     public virtual ICollection<Episode> Episodes { get; set; } = new List<Episode>();
 

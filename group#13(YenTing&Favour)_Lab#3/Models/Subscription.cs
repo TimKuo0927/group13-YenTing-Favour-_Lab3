@@ -7,7 +7,7 @@ public partial class Subscription
 {
     public int SubscriptionId { get; set; }
 
-    public Guid UserId { get; set; }
+    public string UserId { get; set; }
 
     public int PodcastId { get; set; }
 
@@ -15,5 +15,5 @@ public partial class Subscription
 
     public virtual Podcast Podcast { get; set; } = null!;
 
-    public virtual User User { get; set; } = null!;
+    //public virtual User User { get; set; } = null!;
 }
