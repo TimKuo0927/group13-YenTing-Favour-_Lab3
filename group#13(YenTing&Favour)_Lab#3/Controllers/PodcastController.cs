@@ -58,5 +58,68 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             await _db.SaveChangesAsync();
             return RedirectToAction("UserPodcast");
         }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> PodcastDetailPage(int PodcastId)
+        {
+
+            var userIdString = _userManager.GetUserId(User);
+            if (String.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            var podcasts = await _db.Podcasts
+                            .Where(p => p.CreatorId == userIdString
+                                        && p.PodcastId == PodcastId
+                                        && (p.IsHidden == false || p.IsHidden == null))
+                            .Include(p => p.Episodes)
+                            .FirstOrDefaultAsync();
+            return View(podcasts);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditPodcastPage(int PodcastId)
+        {
+
+            var userIdString = _userManager.GetUserId(User);
+            if (String.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            var podcasts = await _db.Podcasts
+                            .Where(p => p.CreatorId == userIdString
+                                        && p.PodcastId == PodcastId
+                                        && (p.IsHidden == false || p.IsHidden == null))
+                            .FirstOrDefaultAsync();
+            return View(podcasts);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> EditPodcast(Podcast model)
+        {
+
+            var userIdString = _userManager.GetUserId(User);
+            if (String.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var podcast =  _db.Podcasts.Where(x=>x.PodcastId==model.PodcastId).FirstOrDefault();
+            if (podcast == null || podcast.CreatorId != userIdString)
+            {
+                return Unauthorized();
+            }
+
+            // Update only editable fields
+            podcast.Title = model.Title;
+            podcast.Description = model.Description;
+
+            await _db.SaveChangesAsync(); // This will generate UPDATE
+            return RedirectToAction("UserPodcast");
+        }
+
     }
 }

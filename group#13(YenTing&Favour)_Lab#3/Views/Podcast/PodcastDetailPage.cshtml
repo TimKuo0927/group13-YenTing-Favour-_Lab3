@@ -1,0 +1,63 @@
+﻿@model group_13_YenTing_Favour__Lab_3.Models.Podcast
+@{
+    ViewData["Title"] = "Podcast Details";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body">
+                    <h2 class="fw-bold text-primary">@Model.Title</h2>
+                    <p class="text-muted">@Model.Description</p>
+                    <p class="text-muted" style="font-size:0.9rem;">Created: @Model.CreatedDate.ToString("MMM dd, yyyy")</p>
+
+                    <div class="d-flex justify-content-end mt-3">
+                        <a asp-controller="Episode" asp-action="CreateEpisode" asp-route-PodcastId="@Model.PodcastId"
+                           class="btn btn-primary">Create Episode</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Episodes</h4>
+
+                    @if (!Model.Episodes.Any())
+                    {
+                        <p class="text-muted">No episodes available for this podcast.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Release Date</th>
+                                    <th>Duration</th>
+                                    <th>Play Count</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var episode in Model.Episodes.OrderByDescending(e => e.ReleaseDate))
+                                {
+                                    <tr>
+                                        <td>@episode.Title</td>
+                                        <td>@episode.ReleaseDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@episode.Duration.ToString(@"hh\:mm\:ss")</td>
+                                        <td>@episode.PlayCount</td>
+                                        <td>
+                                            <a asp-controller="Episode" asp-action="Details" asp-route-id="@episode.EpisodeId"
+                                               class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

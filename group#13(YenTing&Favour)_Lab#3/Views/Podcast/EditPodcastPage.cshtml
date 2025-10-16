@@ -1,0 +1,51 @@
+﻿@model group_13_YenTing_Favour__Lab_3.Models.Podcast
+@{
+    ViewData["Title"] = "Update Podcast";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 fw-bold text-primary">Update Podcast</h2>
+
+                    <div class="d-flex justify-content-end mb-3">
+                        <form asp-action="DeletePodcast" method="post" onsubmit="return confirm('Are you sure you want to delete this podcast?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="PodcastId" />
+                            <button type="submit" class="btn btn-danger">Delete Podcast</button>
+                        </form>
+                    </div>
+
+                    <form asp-action="EditPodcast" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="PodcastId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -35,9 +35,9 @@
                             @* </p> *@
 
                             <div class="mt-auto d-flex justify-content-between">
-                                <a asp-controller="Podcast" asp-action="Details" asp-route-id="@podcast.PodcastId"
+                                <a asp-controller="Podcast" asp-action="PodcastDetailPage" asp-route-PodcastId="@podcast.PodcastId"
                                    class="btn btn-outline-primary btn-sm">View</a>
-                                <a asp-controller="Podcast" asp-action="Edit" asp-route-id="@podcast.PodcastId"
+                                <a asp-controller="Podcast" asp-action="EditPodcastPage" asp-route-PodcastId="@podcast.PodcastId"
                                    class="btn btn-outline-secondary btn-sm">Edit</a>
                             </div>
                         </div>
