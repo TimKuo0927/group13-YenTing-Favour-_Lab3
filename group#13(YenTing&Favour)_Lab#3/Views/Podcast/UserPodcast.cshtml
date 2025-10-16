@@ -1,0 +1,49 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model List<Podcast>
+@{
+    ViewData["Title"] = "User Podcast";
+}
+<div class="container mt-5 min-vh-80">
+    <h2 class="text-center mb-4 fw-bold text-primary">My Podcasts</h2>
+    <div class="row">
+        <div class="col-10"></div>
+        <a asp-controller="Podcast" asp-action="CreatePodcastPage" class="btn btn-primary mb-3 col-2">Create New Podcast</a>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="text-center text-muted">You haven't created any podcasts yet.</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var podcast in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 rounded-4">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">@podcast.Title</h5>
+                            <p class="card-text text-truncate">@podcast.Description</p>
+                            <p class="text-muted mb-1" style="font-size:0.9rem;">
+                                Created: @podcast.CreatedDate.ToString("MMM dd, yyyy")
+                            </p>
+                            @* <p class="text-muted mb-3" style="font-size:0.9rem;"> *@
+                            @*     Episodes: @podcast.Episodes.Count *@
+                            @* </p> *@
+
+                            <div class="mt-auto d-flex justify-content-between">
+                                <a asp-controller="Podcast" asp-action="Details" asp-route-id="@podcast.PodcastId"
+                                   class="btn btn-outline-primary btn-sm">View</a>
+                                <a asp-controller="Podcast" asp-action="Edit" asp-route-id="@podcast.PodcastId"
+                                   class="btn btn-outline-secondary btn-sm">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
