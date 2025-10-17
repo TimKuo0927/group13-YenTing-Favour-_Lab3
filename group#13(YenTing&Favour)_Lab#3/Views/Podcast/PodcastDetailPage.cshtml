@@ -13,7 +13,7 @@
                     <p class="text-muted" style="font-size:0.9rem;">Created: @Model.CreatedDate.ToString("MMM dd, yyyy")</p>
 
                     <div class="d-flex justify-content-end mt-3">
-                        <a asp-controller="Episode" asp-action="CreateEpisode" asp-route-PodcastId="@Model.PodcastId"
+                        <a asp-controller="Episode" asp-action="CreateEposidePage" asp-route-PodcastId="@Model.PodcastId"
                            class="btn btn-primary">Create Episode</a>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                                         <td>@episode.Duration.ToString(@"hh\:mm\:ss")</td>
                                         <td>@episode.PlayCount</td>
                                         <td>
-                                            <a asp-controller="Episode" asp-action="Details" asp-route-id="@episode.EpisodeId"
+                                            <a asp-controller="Episode" asp-action="EposideDetailPage" asp-route-EpisodeId="@episode.EpisodeId"
                                                class="btn btn-sm btn-outline-primary">View</a>
                                         </td>
                                     </tr>
