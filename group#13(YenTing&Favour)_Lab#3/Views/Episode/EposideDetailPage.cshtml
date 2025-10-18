@@ -14,6 +14,10 @@
             <div class="card shadow-sm border-0 rounded-4 mb-4">
                 <div class="card-body">
                     <h2 class="fw-bold text-primary mb-3">@Model.Title</h2>
+                    <div class="col">
+                        <div class="col-10"></div>
+                        <a class="btn btn-primary" asp-controller="Episode" asp-action="EditEpisodePage" asp-route-EpisodeId="@Model.EpisodeId">Edit Eposide</a>
+                    </div>
                     <p class="text-muted mb-1">
                         <strong>Podcast:</strong> @Model.Podcast?.Title
                     </p>

@@ -105,5 +105,106 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             return View(episode);
         }
 
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditEpisodePage(int EpisodeId)
+        {
+            var userIdString = _userManager.GetUserId(User);
+            if (String.IsNullOrEmpty(userIdString))
+                return RedirectToAction("Login", "Account");
+
+            var episode = await _db.Episodes
+                .Include(e => e.Podcast)
+                .FirstOrDefaultAsync(e => e.EpisodeId == EpisodeId);
+
+
+            // only generate pre-signed URL if we have a stored key
+            if (!string.IsNullOrEmpty(episode.AudioFileUrl))
+            {
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = AWSUtil.bucketName,
+                    Key = episode.AudioFileUrl, // this is the S3 key
+                    Expires = DateTime.UtcNow.AddHours(1)
+                };
+
+                var presignedUrl = AWSUtil.s3Client.GetPreSignedURL(request);
+                ViewBag.VideoUrl = presignedUrl; // store temporary URL separately
+            }
+
+            return View(episode);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditEpisode(Episode episode, IFormFile? VideoFile)
+        {
+            var existing = await _db.Episodes.FindAsync(episode.EpisodeId);
+            if (existing == null)
+                return NotFound();
+
+            existing.Title = episode.Title;
+
+            // if new file uploaded, replace in S3
+            if (VideoFile != null && VideoFile.Length > 0)
+            {
+                var userName = User.Identity?.Name ?? "unknown";
+                var fileExtension = Path.GetExtension(VideoFile.FileName);
+                var fileKey = $"{userName}/{Guid.NewGuid()}{fileExtension}";
+
+                await AWSUtil.s3Client.DeleteObjectAsync(new Amazon.S3.Model.DeleteObjectRequest
+                {
+                    BucketName = AWSUtil.bucketName,
+                    Key = existing.AudioFileUrl
+                });
+
+                using var stream = VideoFile.OpenReadStream();
+                var putRequest = new Amazon.S3.Model.PutObjectRequest
+                {
+                    BucketName = AWSUtil.bucketName,
+                    Key = fileKey,
+                    InputStream = stream,
+                    ContentType = VideoFile.ContentType,
+                };
+                await AWSUtil.s3Client.PutObjectAsync(putRequest);
+
+                existing.AudioFileUrl = fileKey; // store key
+            }
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction("PodcastDetailPage", "Podcast", new { PodcastId = existing.PodcastId });
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> DeleteEpisode(int EpisodeId)
+        {
+            var userIdString = _userManager.GetUserId(User);
+            if (String.IsNullOrEmpty(userIdString)) {
+                return RedirectToAction("Login", "Account");
+            }
+                
+
+            
+            var existing = await _db.Episodes
+                .Include(e => e.Podcast)
+                .FirstOrDefaultAsync(e => e.EpisodeId == EpisodeId);
+
+            if(existing.Podcast.CreatorId != userIdString)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            await AWSUtil.s3Client.DeleteObjectAsync(new Amazon.S3.Model.DeleteObjectRequest
+            {
+                BucketName = AWSUtil.bucketName,
+                Key = existing.AudioFileUrl
+            });
+            _db.Remove(existing);
+            await _db.SaveChangesAsync();
+            return RedirectToAction("PodcastDetailPage", "Podcast", new { PodcastId = existing.PodcastId });
+        }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using group_13_YenTing_Favour__Lab_3.Models;
+﻿using Amazon.S3.Model;
+using group_13_YenTing_Favour__Lab_3.Models;
+using group_13_YenTing_Favour__Lab_3.Services;
 using group_13_YenTing_Favour__Lab_3.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -121,5 +123,42 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             return RedirectToAction("UserPodcast");
         }
 
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> DeletePodcast(int PodcastId)
+        {
+
+            var userIdString = _userManager.GetUserId(User);
+            if (String.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var podcast = _db.Podcasts.Where(x => x.PodcastId == PodcastId).Include(x=>x.Episodes).FirstOrDefault();
+            if(podcast == null || podcast.CreatorId != userIdString)
+            {
+                return Unauthorized();
+            }
+
+            // delete S3 objects
+            var deleteTasks = podcast.Episodes.Select(ep =>
+                AWSUtil.s3Client.DeleteObjectAsync(new Amazon.S3.Model.DeleteObjectRequest
+                {
+                    BucketName = AWSUtil.bucketName,
+                    Key = ep.AudioFileUrl
+                })
+            ).ToList();
+
+            await Task.WhenAll(deleteTasks);
+
+            _db.Episodes.RemoveRange(podcast.Episodes);
+            _db.Podcasts.Remove(podcast);
+
+            await _db.SaveChangesAsync();
+
+  
+            return RedirectToAction("UserPodcast");
+        }
+        
     }
 }
