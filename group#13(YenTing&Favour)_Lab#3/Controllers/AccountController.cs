@@ -2,6 +2,7 @@
 using group_13_YenTing_Favour__Lab_3.ViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace group_13_YenTing_Favour__Lab_3.Controllers
 {
@@ -14,11 +15,13 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
 
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly Lab3Context _db;
 
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, Lab3Context db)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _db = db;
         }
 
 
@@ -49,6 +52,7 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -81,6 +85,17 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpGet]
+        public IActionResult UserSubPage()
+        {
+            string userId = _userManager.GetUserId(User);
+            var SubList = _db.Subscriptions
+                            .Where(s => s.UserId == userId)
+                            .OrderByDescending(s => s.SubscribedDate)
+                            .Include(x=>x.Podcast)
+                            .ToList();
+            return View(SubList);
+        }
 
     }
 }

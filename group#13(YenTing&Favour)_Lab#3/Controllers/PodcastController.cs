@@ -65,12 +65,25 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
         [HttpGet]
         public async Task<IActionResult> PodcastDetailPage(int PodcastId)
         {
+            var c = User;
 
             var userIdString = _userManager.GetUserId(User);
             if (String.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Login", "Account");
             }
+            Podcast podcast = new Podcast();
+
+            if (User.IsInRole("user"))
+            {
+                podcast = await _db.Podcasts
+                                .Where(p => p.PodcastId == PodcastId
+                                            && (p.IsHidden == false || p.IsHidden == null))
+                                .Include(p => p.Episodes)
+                                .FirstOrDefaultAsync();
+                return View(podcast);
+            }
+
             var podcasts = await _db.Podcasts
                             .Where(p => p.CreatorId == userIdString
                                         && p.PodcastId == PodcastId

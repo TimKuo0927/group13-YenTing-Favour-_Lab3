@@ -1,7 +1,12 @@
 ﻿@model group_13_YenTing_Favour__Lab_3.Models.Podcast
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+
 @{
     ViewData["Title"] = "Podcast Details";
+    var userId = UserManager.GetUserId(User);
 }
+
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -12,10 +17,14 @@
                     <p class="text-muted">@Model.Description</p>
                     <p class="text-muted" style="font-size:0.9rem;">Created: @Model.CreatedDate.ToString("MMM dd, yyyy")</p>
 
-                    <div class="d-flex justify-content-end mt-3">
-                        <a asp-controller="Episode" asp-action="CreateEposidePage" asp-route-PodcastId="@Model.PodcastId"
-                           class="btn btn-primary">Create Episode</a>
-                    </div>
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("podcaster") && userId == Model.CreatorId)
+                    {
+                        <div class="d-flex justify-content-end mt-3">
+                            <a asp-controller="Episode" asp-action="CreateEposidePage" asp-route-PodcastId="@Model.PodcastId"
+                               class="btn btn-primary">Create Episode</a>
+                        </div>
+                    }
+                    
                 </div>
             </div>
 
@@ -34,7 +43,7 @@
                                 <tr>
                                     <th>Title</th>
                                     <th>Release Date</th>
-                                    <th>Duration</th>
+                                    @* <th>Duration</th> *@
                                     <th>Play Count</th>
                                     <th>Actions</th>
                                 </tr>
@@ -45,7 +54,7 @@
                                     <tr>
                                         <td>@episode.Title</td>
                                         <td>@episode.ReleaseDate.ToString("MMM dd, yyyy")</td>
-                                        <td>@episode.Duration.ToString(@"hh\:mm\:ss")</td>
+                                        @* <td>@episode.Duration.ToString(@"hh\:mm\:ss")</td> *@
                                         <td>@episode.PlayCount</td>
                                         <td>
                                             <a asp-controller="Episode" asp-action="EposideDetailPage" asp-route-EpisodeId="@episode.EpisodeId"

@@ -104,11 +104,18 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
                 Expires = DateTime.UtcNow.AddHours(1)
             };
             var url = AWSUtil.s3Client.GetPreSignedURL(request);
-            episode.AudioFileUrl = url;
+            //episode.AudioFileUrl = url;
 
             
             DynamoCommentService commentService = new DynamoCommentService();
             var comments = await commentService.GetCommentsByEpisodeAsync(EpisodeId);
+
+            if (User.IsInRole("user"))
+            {
+                episode.PlayCount += 1;
+                episode.NumberOfViews += 1;
+                await _db.SaveChangesAsync();
+            }
 
             EpisodeWirhCommentViewModel episodeWirhCommentViewModel = new EpisodeWirhCommentViewModel
             {
@@ -118,7 +125,7 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
                 ReleaseDate = episode.ReleaseDate,
                 Duration = episode.Duration,
                 PlayCount = episode.PlayCount,
-                AudioFileUrl = episode.AudioFileUrl,
+                AudioFileUrl = url,
                 NumberOfViews = episode.NumberOfViews,
                 Podcast = episode.Podcast,
                 Comments = comments
@@ -228,6 +235,58 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             await _db.SaveChangesAsync();
             return RedirectToAction("PodcastDetailPage", "Podcast", new { PodcastId = existing.PodcastId });
         }
+
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int EpisodeId, string Message)
+        {
+            if (string.IsNullOrWhiteSpace(Message))
+                return RedirectToAction("EposideDetailPage", new { EpisodeId });
+
+            var userId = _userManager.GetUserId(User);
+            var userName = User.Identity?.Name ?? "Anonymous";
+
+            var comment = new Comment
+            {
+                EpisodeId = EpisodeId,
+                CommentId = Guid.NewGuid().ToString(),
+                UserName = userName,
+                Message = Message,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var service = new DynamoCommentService();
+            await service.AddCommentAsync(comment);
+
+            return RedirectToAction("EposideDetailPage", new { EpisodeId });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditComment(int EpisodeId, string CommentId, string UpdatedMessage)
+        {
+            if (string.IsNullOrWhiteSpace(UpdatedMessage))
+                return RedirectToAction("EposideDetailPage", new { EpisodeId });
+
+            var userId = _userManager.GetUserId(User);
+            var commentService = new DynamoCommentService();
+
+            var comments = await commentService.GetCommentsByEpisodeAsync(EpisodeId);
+            var comment = comments.FirstOrDefault(c => c.CommentId == CommentId);
+            if (comment == null) return Unauthorized();
+
+            // Only allow edits within 24 hours
+            if (DateTime.UtcNow - comment.CreatedAt > TimeSpan.FromHours(24))
+                return Forbid();
+
+            await commentService.UpdateCommentAsync(EpisodeId, CommentId, UpdatedMessage);
+
+            return RedirectToAction("EposideDetailPage", new { EpisodeId });
+        }
+
 
     }
 }

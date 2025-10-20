@@ -1,11 +1,9 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-@model group_13_YenTing_Favour__Lab_3.ViewModel.EpisodeWirhCommentViewModel
+﻿@model group_13_YenTing_Favour__Lab_3.ViewModel.EpisodeWirhCommentViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
 @{
     ViewData["Title"] = "Episode Details";
+    var userId = UserManager.GetUserId(User);
 }
 
 <div class="container mt-5">
@@ -14,42 +12,76 @@
             <div class="card shadow-sm border-0 rounded-4 mb-4">
                 <div class="card-body">
                     <h2 class="fw-bold text-primary mb-3">@Model.Title</h2>
-                    <div class="col">
-                        <div class="col-10"></div>
-                        <a class="btn btn-primary col-2" asp-controller="Episode" asp-action="EditEpisodePage" asp-route-EpisodeId="@Model.EpisodeId">Edit Eposide</a>
-                    </div>
-                    <p class="text-muted mb-1">
-                        <strong>Podcast:</strong> @Model.Podcast?.Title
-                    </p>
-                    <p class="text-muted mb-1">
-                        <strong>Release Date:</strong> @Model.ReleaseDate.ToString("MMMM dd, yyyy")
-                    </p>
-                    <p class="text-muted mb-1">
-                        <strong>Duration:</strong> @TimeSpan.FromSeconds(Model.Duration).ToString(@"hh\:mm\:ss")
-                    </p>
-                    <p class="text-muted">
-                        <strong>Views:</strong> @Model.NumberOfViews
-                    </p>
 
-                    <div class="mt-4">
-                        <video width="100%" controls poster="/images/video-placeholder.png">
-                            <source src="@Model.AudioFileUrl" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+                    @* Creator-only edit episode *@
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("podcaster") && userId == Model.Podcast.CreatorId)
+                    {
+                        <div class="text-end mb-3">
+                            <a class="btn btn-primary" asp-controller="Episode" asp-action="EditEpisodePage" asp-route-EpisodeId="@Model.EpisodeId">
+                                Edit Episode
+                            </a>
+                        </div>
+                    }
+
+                    <video width="100%" controls poster="/images/video-placeholder.png" class="mb-4">
+                        <source src="@Model.AudioFileUrl" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <h4 class="fw-bold mb-3">Comments</h4>
 
                     @if (Model.Comments != null && Model.Comments.Any())
                     {
                         foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedAt))
                         {
-                            <div class="border rounded-3 p-3 mb-2">
-                                <div class="d-flex justify-content-between">
+                            var isOwner = comment.UserName == User.Identity.Name;
+                            var within24hrs = DateTime.UtcNow - comment.CreatedAt <= TimeSpan.FromHours(24);
+
+                            <div class="border rounded-3 p-3 mb-2 bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
                                     <strong>@comment.UserName</strong>
                                     <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</small>
                                 </div>
-                                <p class="mb-0">@comment.Message</p>
+                                <p class="mb-2">@comment.Message</p>
+
+                                @if (isOwner && within24hrs)
+                                {
+                                    <form asp-action="EditComment" asp-controller="Episode" method="post" class="mt-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="EpisodeId" value="@Model.EpisodeId" />
+                                        <input type="hidden" name="CommentId" value="@comment.CommentId" />
+
+                                        <div class="input-group">
+                                            <input type="text" name="UpdatedMessage" class="form-control" placeholder="Edit your comment..." />
+                                            <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                        </div>
+                                    </form>
+                                }
                             </div>
                         }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No comments yet. Be the first to comment!</p>
+                    }
+
+                    @* New comment form *@
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <form asp-action="AddComment" asp-controller="Episode" method="post" class="mt-4">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="EpisodeId" value="@Model.EpisodeId" />
+
+                            <div class="mb-3">
+                                <textarea name="Message" class="form-control" rows="3" placeholder="Leave a comment..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-muted mt-3">You must <a asp-controller="Account" asp-action="Login">log in</a> to comment.</p>
                     }
 
                     <div class="mt-4 d-flex justify-content-between">

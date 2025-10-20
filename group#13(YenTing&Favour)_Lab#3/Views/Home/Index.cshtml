@@ -1,9 +1,94 @@
-﻿@model string
+﻿@model group_13_YenTing_Favour__Lab_3.ViewModel.HomeViewModel
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+
+    <!--  Search Section -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4 p-4">
+        <form asp-action="Index" method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control"
+                       placeholder="Search podcasts by topic or host..." />
+            </div>
+            <div class="col-md-3">
+                <select name="filter" class="form-select">
+                    <option value="">By Topic</option>
+                    <option value="host" selected="@(Context.Request.Query["filter"] == "host")" >By Host</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!--  Most Popular Episodes -->
+    <h3 class="text-primary mb-3 fw-bold"> Most Popular Episodes</h3>
+    <div class="row mb-5">
+        @foreach (var ep in Model.MostPopularEpisodes)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold">@ep.Title</h5>
+                        <p class="text-muted small mb-1">From: @ep.Podcast?.Title</p>
+                        <p class="text-muted mb-2"><strong>Views:</strong> @ep.NumberOfViews</p>
+                        <a asp-controller="Episode" asp-action="EposideDetailPage"
+                           asp-route-EpisodeId="@ep.EpisodeId"
+                           class="btn btn-outline-primary btn-sm">View Episode</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Recent Episodes -->
+    <h3 class="text-success mb-3 fw-bold"> Recent Episodes</h3>
+    <div class="row mb-5">
+        @foreach (var ep in Model.RecentEpisodes)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold">@ep.Title</h5>
+                        <p class="text-muted small mb-1">From: @ep.Podcast?.Title</p>
+                        <p class="text-muted mb-2"><strong>Released:</strong> @ep.ReleaseDate.ToString("MMM dd, yyyy")</p>
+                        <a asp-controller="Episode" asp-action="EposideDetailPage"
+                           asp-route-EpisodeId="@ep.EpisodeId"
+                           class="btn btn-outline-success btn-sm">Watch Episode</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!--  Search Results -->
+    @if (Model.SearchResults.Any())
+    {
+        <h3 class="text-info mb-3 fw-bold"> Search Results</h3>
+        <div class="row">
+            @foreach (var p in Model.SearchResults)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold">@p.Title</h5>
+                            <p class="text-muted small mb-1"><strong>Host:</strong> @p.Creator.UserName</p>
+                            <p class="text-muted">@p.Description</p>
+                            <a asp-controller="Podcast" asp-action="PodcastDetailPage"
+                               asp-route-PodcastId="@p.PodcastId"
+                               class="btn btn-outline-info btn-sm">View Podcast</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.SearchTerm))
+    {
+        <p class="text-muted">No podcasts found for "<strong>@Model.SearchTerm</strong>".</p>
+    }
+
 </div>

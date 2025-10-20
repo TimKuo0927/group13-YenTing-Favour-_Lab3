@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace group_13_YenTing_Favour__Lab_3.Models;
@@ -16,6 +17,9 @@ public partial class Podcast
     public DateTime CreatedDate { get; set; }
 
     public bool? IsHidden { get; set; }
+
+    public virtual IdentityUser Creator { get; set; } = null!;
+
 
     //public virtual User Creator { get; set; } = null!;
 
