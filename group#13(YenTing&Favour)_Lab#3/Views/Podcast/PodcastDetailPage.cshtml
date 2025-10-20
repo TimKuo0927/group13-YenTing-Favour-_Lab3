@@ -1,10 +1,18 @@
 ﻿@model group_13_YenTing_Favour__Lab_3.Models.Podcast
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<IdentityUser> UserManager
+@using Microsoft.EntityFrameworkCore
+@inject group_13_YenTing_Favour__Lab_3.Models.Lab3Context DbContext
 
 @{
     ViewData["Title"] = "Podcast Details";
     var userId = UserManager.GetUserId(User);
+    bool isSubscribed = false;
+    if (User.Identity.IsAuthenticated)
+    {
+        isSubscribed = DbContext.Subscriptions
+            .Any(s => s.PodcastId == Model.PodcastId && s.UserId == userId);
+    }
 }
 
 
@@ -24,7 +32,29 @@
                                class="btn btn-primary">Create Episode</a>
                         </div>
                     }
-                    
+                    @if (User.Identity.IsAuthenticated && userId != Model.CreatorId)
+                    {
+                        if (isSubscribed)
+                        {
+                            <form asp-action="Unsubscribe" asp-controller="Podcast" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="podcastId" value="@Model.PodcastId" />
+                                <button type="submit" class="btn btn-outline-danger">
+                                    Unsubscribe
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Subscribe" asp-controller="Podcast" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="podcastId" value="@Model.PodcastId" />
+                                <button type="submit" class="btn btn-outline-success">
+                                    Subscribe
+                                </button>
+                            </form>
+                        }
+                    }
                 </div>
             </div>
 

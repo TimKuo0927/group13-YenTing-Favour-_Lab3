@@ -172,6 +172,48 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
   
             return RedirectToAction("UserPodcast");
         }
-        
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Subscribe(int podcastId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // check if already subscribed
+            var exists = await _db.Subscriptions
+                .AnyAsync(s => s.PodcastId == podcastId && s.UserId == userId);
+
+            if (!exists)
+            {
+                var sub = new Subscription
+                {
+                    UserId = userId,
+                    PodcastId = podcastId,
+                    SubscribedDate = DateTime.Now
+                };
+                await _db.Subscriptions.AddAsync(sub);
+                await _db.SaveChangesAsync();
+            }
+
+            return RedirectToAction("PodcastDetailPage", new { PodcastId = podcastId });
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Unsubscribe(int podcastId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var sub = await _db.Subscriptions
+                .FirstOrDefaultAsync(s => s.PodcastId == podcastId && s.UserId == userId);
+
+            if (sub != null)
+            {
+                _db.Subscriptions.Remove(sub);
+                await _db.SaveChangesAsync();
+            }
+
+            return RedirectToAction("PodcastDetailPage", new { PodcastId = podcastId });
+        }
+
     }
 }
