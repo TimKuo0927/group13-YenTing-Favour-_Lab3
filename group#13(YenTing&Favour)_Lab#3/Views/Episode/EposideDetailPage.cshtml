@@ -3,7 +3,7 @@
 *@
 @{
 }
-@model group_13_YenTing_Favour__Lab_3.Models.Episode
+@model group_13_YenTing_Favour__Lab_3.ViewModel.EpisodeWirhCommentViewModel
 @{
     ViewData["Title"] = "Episode Details";
 }
@@ -16,7 +16,7 @@
                     <h2 class="fw-bold text-primary mb-3">@Model.Title</h2>
                     <div class="col">
                         <div class="col-10"></div>
-                        <a class="btn btn-primary" asp-controller="Episode" asp-action="EditEpisodePage" asp-route-EpisodeId="@Model.EpisodeId">Edit Eposide</a>
+                        <a class="btn btn-primary col-2" asp-controller="Episode" asp-action="EditEpisodePage" asp-route-EpisodeId="@Model.EpisodeId">Edit Eposide</a>
                     </div>
                     <p class="text-muted mb-1">
                         <strong>Podcast:</strong> @Model.Podcast?.Title
@@ -37,6 +37,20 @@
                             Your browser does not support the video tag.
                         </video>
                     </div>
+
+                    @if (Model.Comments != null && Model.Comments.Any())
+                    {
+                        foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedAt))
+                        {
+                            <div class="border rounded-3 p-3 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <strong>@comment.UserName</strong>
+                                    <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</small>
+                                </div>
+                                <p class="mb-0">@comment.Message</p>
+                            </div>
+                        }
+                    }
 
                     <div class="mt-4 d-flex justify-content-between">
                         <a asp-controller="Podcast" asp-action="PodcastDetailPage" asp-route-PodcastId="@Model.PodcastId"

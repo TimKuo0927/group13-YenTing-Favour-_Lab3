@@ -1,7 +1,10 @@
-﻿using Amazon.S3;
+﻿using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.S3;
 using Amazon.S3.Model;
 using group_13_YenTing_Favour__Lab_3.Models;
 using group_13_YenTing_Favour__Lab_3.Services;
+using group_13_YenTing_Favour__Lab_3.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -102,7 +105,27 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             };
             var url = AWSUtil.s3Client.GetPreSignedURL(request);
             episode.AudioFileUrl = url;
-            return View(episode);
+
+            
+            DynamoCommentService commentService = new DynamoCommentService();
+            var comments = await commentService.GetCommentsByEpisodeAsync(EpisodeId);
+
+            EpisodeWirhCommentViewModel episodeWirhCommentViewModel = new EpisodeWirhCommentViewModel
+            {
+                EpisodeId = episode.EpisodeId,
+                PodcastId = episode.PodcastId,
+                Title = episode.Title,
+                ReleaseDate = episode.ReleaseDate,
+                Duration = episode.Duration,
+                PlayCount = episode.PlayCount,
+                AudioFileUrl = episode.AudioFileUrl,
+                NumberOfViews = episode.NumberOfViews,
+                Podcast = episode.Podcast,
+                Comments = comments
+            };
+
+
+            return View(episodeWirhCommentViewModel);
         }
 
         [Authorize]
