@@ -110,7 +110,7 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             DynamoCommentService commentService = new DynamoCommentService();
             var comments = await commentService.GetCommentsByEpisodeAsync(EpisodeId);
 
-            if (User.IsInRole("user"))
+            if (userIdString!=episode.Podcast.CreatorId)
             {
                 episode.PlayCount += 1;
                 episode.NumberOfViews += 1;

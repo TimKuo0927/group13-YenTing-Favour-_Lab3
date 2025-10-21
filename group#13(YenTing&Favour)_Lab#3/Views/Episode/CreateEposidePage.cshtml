@@ -5,19 +5,32 @@
 }
 @model group_13_YenTing_Favour__Lab_3.Models.Episode
 
-<form asp-action="CreateEpisode" asp-controller="Episode" method="post" enctype="multipart/form-data">
-    @Html.AntiForgeryToken()
 
-    <div class="mb-3">
-        <label asp-for="Title" class="form-label"></label>
-        <input asp-for="Title" class="form-control" placeholder="Episode Title" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
-    <input asp-for="PodcastId" class="form-control" placeholder="Episode Title" type="hidden" value="@Model.PodcastId"/>
-    <div class="mb-3">
-        <label for="VideoFile" class="form-label">Video File</label>
-        <input type="file" name="VideoFile" class="form-control" accept="video/*" required />
-    </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 fw-bold text-primary">Create Epodside</h2>
 
-    <button type="submit" class="btn btn-primary">Upload Episode</button>
-</form>
+                    <form asp-action="CreateEpisode" asp-controller="Episode" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Episode Title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+                        <input asp-for="PodcastId" class="form-control" placeholder="Episode Title" type="hidden" value="@Model.PodcastId" />
+                        <div class="mb-3">
+                            <label for="VideoFile" class="form-label">Video File</label>
+                            <input type="file" name="VideoFile" class="form-control" accept="video/*" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Upload Episode</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

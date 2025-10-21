@@ -74,19 +74,18 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
             }
             Podcast podcast = new Podcast();
 
-            if (User.IsInRole("user"))
-            {
-                podcast = await _db.Podcasts
-                                .Where(p => p.PodcastId == PodcastId
-                                            && (p.IsHidden == false || p.IsHidden == null))
-                                .Include(p => p.Episodes)
-                                .FirstOrDefaultAsync();
-                return View(podcast);
-            }
+            //if (User.IsInRole("user"))
+            //{
+            //    podcast = await _db.Podcasts
+            //                    .Where(p => p.PodcastId == PodcastId
+            //                                && (p.IsHidden == false || p.IsHidden == null))
+            //                    .Include(p => p.Episodes)
+            //                    .FirstOrDefaultAsync();
+            //    return View(podcast);
+            //}
 
             var podcasts = await _db.Podcasts
-                            .Where(p => p.CreatorId == userIdString
-                                        && p.PodcastId == PodcastId
+                            .Where(p =>  p.PodcastId == PodcastId
                                         && (p.IsHidden == false || p.IsHidden == null))
                             .Include(p => p.Episodes)
                             .FirstOrDefaultAsync();

@@ -93,6 +93,7 @@ namespace group_13_YenTing_Favour__Lab_3.Controllers
                             .Where(s => s.UserId == userId)
                             .OrderByDescending(s => s.SubscribedDate)
                             .Include(x=>x.Podcast)
+                            .Where(x=>x.Podcast.IsHidden == false|| x.Podcast.IsHidden==null)
                             .ToList();
             return View(SubList);
         }
